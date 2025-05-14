@@ -1,5 +1,12 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: black;
+  /* background-color: black; */
+  font-size: 13px;
+  line-height: 1.5em;
+}
+.clearfix::after {
+  content: "";
+  display: block;
+  clear:both;
 }

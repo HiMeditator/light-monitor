@@ -3,14 +3,17 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+import {handelGetHardwareInfo} from './hardwareInfo'
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     icon: icon,
-    width: 900,
-    height: 670,
+    width: 960,
+    height: 690,
     center: true,
     show: false,
     autoHideMenuBar: true,
+    // alwaysOnTop: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -40,6 +43,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  handelGetHardwareInfo()
+  
   createWindow()
 
   app.on('activate', function () {
