@@ -2,17 +2,20 @@ import si from 'systeminformation';
 import { ipcMain } from 'electron';
 
 export function handelGetHardwareInfo() {
+    ipcMain.handle('get.procInfo', async () => {
+        const data = await si.processes();
+        return data;
+    })
     ipcMain.handle('get.sysInfo', async () => {
         const data = await si.system();
-        console.log(data);
         return data;
     })
     ipcMain.handle('get.osInfo', async () => {
         const data = await si.osInfo();
         return data;
     })
-    ipcMain.handle('get.memInfo', async () => {
-        const data = await si.mem();
+    ipcMain.handle('get.memsInfo', async () => {
+        const data = await si.memLayout();
         return data;
     })
     ipcMain.handle('get.disksInfo', async () => {

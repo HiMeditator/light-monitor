@@ -5,11 +5,11 @@
       v-model:selectedKeys="current"
       mode="horizontal"
       :items="items"
-      @click="console.log(current)"
     >
     </a-menu>
-    <div style="height: 45px;"></div>
+    <div style="height: 60px;"></div>
     <router-view></router-view>
+    <div style="height: 20px;"></div>
   </div>
 </template>
 
@@ -23,18 +23,19 @@
     {
       key: 'hardware-info',
       icon: () => h(DesktopOutlined),
-      label: h(RouterLink, { to: '/' }, () => '硬件信息')
+      label: h(RouterLink, { to: '/' }, () => '系统信息')
     },
     {
       key: 'software-info',
       icon: () => h(AppstoreAddOutlined),
-      label: h(RouterLink, { to: '/software-info' }, () => '软件信息')
+      label: h(RouterLink, { to: '/software-info' }, () => '数据监控')
     }
   ]);
 </script>
 
 <style scoped>
 #nav-bar {
-  position: absolute;
+  position: fixed;
+  width: 100%;
 }
 </style>  

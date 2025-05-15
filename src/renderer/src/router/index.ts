@@ -1,6 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router'
 
-import HardwareInfo from '@renderer/views/HardwareInfo.vue'
+import HardwareInfo from '@renderer/views/SystemInfo.vue'
 import SoftwareInfo from '@renderer/views/SoftwareInfo.vue'
 
 const router = createRouter({
