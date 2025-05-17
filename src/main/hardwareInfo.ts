@@ -10,6 +10,10 @@ export function handelGetHardwareInfo() {
         const data = await si.system();
         return data;
     })
+    ipcMain.handle('get.boardInfo', async () => {
+        const data = await si.baseboard();
+        return data;
+    })
     ipcMain.handle('get.osInfo', async () => {
         const data = await si.osInfo();
         return data;
@@ -28,6 +32,14 @@ export function handelGetHardwareInfo() {
     })
     ipcMain.handle('get.displayInfo', async () => {
         const data = await si.graphics();
+        return data;
+    })
+    ipcMain.handle('get.batteryInfo', async () => {
+        const data = await si.battery();
+        return data;
+    })
+    ipcMain.handle('get.cpuTempInfo', async () => {
+        const data = await si.cpuTemperature();
         return data;
     })
 }

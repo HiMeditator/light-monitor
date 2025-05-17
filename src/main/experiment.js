@@ -20,10 +20,18 @@ import si from 'systeminformation';
 //     console.log(data);
 // });
 
-// si.bluetoothDevices().then(data => {
+// si.battery().then(data => {
 //     console.log(data);
 // });
 
-si.osInfo().then(data => {
-    console.log(data);
-});
+// si.cpuTemperature().then(data => {
+//     console.log(data);
+// });
+
+// si.chassis().then(data => {
+//     console.log(data);
+// });
+
+// si.graphics().then(data => {
+//     console.log(data);
+// });

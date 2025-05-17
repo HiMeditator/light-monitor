@@ -4,51 +4,12 @@
 
     <div class="info-item">
       <div class="item-title">
-        <FontAwesomeIcon :icon="faChartSimple" /> 系统服务状态
-        <FontAwesomeIcon
-          :icon="faArrowsRotate"
-          title="获取最新信息"
-          class="refresh-btn"
-          @click="getProcInfo()"
-        />
-      </div>
-      <div><b>全部进程：</b>{{ procInfo.all }}</div>
-      <ul>
-        <li><div><b>运行进程：</b>{{ procInfo.running }}</div></li>
-        <li><div><b>阻塞进程：</b>{{ procInfo.blocked }}</div></li>
-        <li><div><b>休眠进程：</b>{{ procInfo.sleeping }}</div></li>
-        <li><div><b>未知状态：</b>{{ procInfo.unknown }}</div></li>
-      </ul>
-    </div>
-
-    <div class="info-item">
-      <div class="item-title">
-        <FontAwesomeIcon :icon="faList" /> 已加载模块
-        <FontAwesomeIcon
-          :icon="faArrowsRotate"
-          title="获取最新信息"
-          class="refresh-btn"
-          @click="getProcInfo()"
-        />
-      </div>
-      <a-table
-        style="width: calc(100% + 32px); margin-left: -8px;margin-top: 8px;"
-        :scroll="{ x: 'max-content' }"
-        class="proc-table"
-        :dataSource="procInfo.list"
-        :columns="procCol"
-        size="small"
-      />
-    </div>
-
-    <div class="info-item">
-      <div class="item-title">
         <FontAwesomeIcon :icon="faComputer" /> 设备信息
       </div>
       <div><b>生产商：</b>{{ sysInfo.manufacturer }}</div>
       <div><b>设备型号：</b>{{ sysInfo.model }}</div>
       <div><b>设备版本：</b>{{ sysInfo.version }}</div>
-      <div><b>设备序列号：</b>{{ sysInfo.serial }}</div>
+      <div><b>设备序列号：</b><span class="blur-info">{{ sysInfo.serial }}</span></div>
       <div><b>是否虚拟机：</b>{{ sysInfo.virtual? "是" : "否" }}</div>
     </div>
 
@@ -61,6 +22,18 @@
       <div><b>内核版本：</b>{{ osInfo.kernel }}</div>
       <div><b>系统架构：</b>{{ osInfo.arch }}</div>
       <div><b>主机名：</b>{{ osInfo.hostname }}</div>
+      <div><b>序列号：</b><span class="blur-info">{{ osInfo.serial }}</span></div>
+    </div>
+
+    <div class="info-item">
+      <div class="item-title">
+        <FontAwesomeIcon :icon="faLayerGroup" /> 主板信息
+      </div>
+      <div><b>生产商：</b>{{ boardInfo.manufacturer }}</div>
+      <div><b>型号：</b>{{ boardInfo.model }}</div>
+      <div><b>版本：</b>{{ boardInfo.version }}</div>
+      <div><b>最大内存：</b>{{ (boardInfo.memMax / 1024 / 1024 / 1024).toFixed(2) }} G</div>
+      <div><b>内存插槽：</b>{{ boardInfo.memSlots }}</div>
     </div>
 
     <div class="info-item">
@@ -86,7 +59,7 @@
     <div v-for="(mem, idx) in memsInfo" class="info-item">
       <div class="item-title"><FontAwesomeIcon :icon="faMemory" /> 内存{{ idx }}信息</div>
       <div><b>生产商：</b>{{ mem.manufacturer }}</div>
-      <div><b>内存容量：</b>{{ (mem.size / 1024 / 1024 / 1024).toFixed(3) }} G</div>
+      <div><b>内存容量：</b>{{ (mem.size / 1024 / 1024 / 1024).toFixed(2) }} G</div>
       <div><b>内存类型：</b>{{ mem.type }}</div>
     </div>
 
@@ -96,8 +69,8 @@
       <div><b>磁盘类型：</b>{{ disk.type }} M</div>
       <div><b>磁盘名称：</b>{{ disk.name }} M</div>
       <div><b>设备路径：</b>{{ disk.device }} M</div>
-      <div><b>磁盘容量：</b>{{ (disk.size / 1024 / 1024 / 1024).toFixed(3) }} G</div>
-      <div><b>磁盘序列号：</b>{{ disk.serialNum }}</div>
+      <div><b>磁盘容量：</b>{{ (disk.size / 1024 / 1024 / 1024).toFixed(2) }} G</div>
+      <div><b>磁盘序列号：</b><span class="blur-info">{{ disk.serialNum }}</span></div>
       <div><b>磁盘SMART状态：</b>{{ disk.smartStatus }}</div>
       <div><b>磁盘SMART状态：</b>{{ disk.smartData || "未获取" }}</div>
     </div>
@@ -107,10 +80,12 @@
       <div><b>控制器型号：</b>{{ displayInfo.controllers[idx-1].model }}</div>
       <div><b>控制器总线类型：</b>{{ displayInfo.controllers[idx-1].bus }}</div>
       <div><b>显存大小：</b>{{ displayInfo.controllers[idx-1].vram }} MB</div>
-      <div><b>显示器制造商：</b>{{ displayInfo.displays[idx-1].vendor }}</div>
-      <div><b>显示器型号：</b>{{ displayInfo.displays[idx-1].model }}</div>
-      <div><b>分辨率：</b>{{ displayInfo.displays[idx-1].resolutionX }} x {{ displayInfo.displays[idx-1].resolutionY }}</div>
-      <div><b>刷新率：</b>{{ displayInfo.displays[idx-1].currentRefreshRate }} Hz</div>
+      <div v-if="displayInfo.displays[idx-1]">
+        <div><b>显示器制造商：</b>{{ displayInfo.displays[idx-1].vendor}}</div>
+        <div><b>显示器型号：</b>{{ displayInfo.displays[idx-1].model }}</div>
+        <div><b>分辨率：</b>{{ displayInfo.displays[idx-1].resolutionX }} x {{ displayInfo.displays[idx-1].resolutionY }}</div>
+        <div><b>刷新率：</b>{{ displayInfo.displays[idx-1].currentRefreshRate }} Hz</div>
+      </div>
     </div>
 
   </div>
@@ -119,79 +94,31 @@
 
 <script setup lang="ts">
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { 
-  faArrowsRotate, faChartSimple, faList,
+import {
   faComputer, faMemory, faHardDrive,
   faMicrochip, faDisplay, faLayerGroup
 } from '@fortawesome/free-solid-svg-icons'
 import { ref } from 'vue'
 
-const procCol = [
-  { 
-    title: 'pid',
-    dataIndex: 'pid',
-    key: 'pid',
-    sorter:{
-      compare: (a: any, b: any) => a.pid - b.pid,
-      multiple: 1
-    }
-  },
-  {
-    title: 'name',
-    dataIndex: 'name',
-    key: 'name',
-    sorter:{
-      compare: (a: any, b: any) => a.name.localeCompare(b.name),
-      multiple: 2
-    }
-  },
-  {
-    title: 'memVsz',
-    dataIndex: 'memVsz',
-    key: 'memVsz',
-    sorter:{
-      compare: (a: any, b: any) => a.memVsz - b.memVsz,
-      multiple: 3
-    }
-  },
-  {
-    title: 'memRss',
-    dataIndex: 'memRss',
-    key: 'memRss',
-    sorter:{
-      compare: (a: any, b: any) => a.memRss - b.memRss,
-      multiple: 4
-    }
-  },
-  {
-    title: 'started',
-    dataIndex: 'started',
-    key: 'started',
-    // sorter:{
-    //   compare: (a: any, b: any) => a.memRss - b.memRss,
-    //   multiple: 4
-    // }
-  }
-]
-const procInfo = ref<any>({})
 const sysInfo = ref<any>({})
+const boardInfo = ref<any>({})
 const osInfo = ref<any>({})
 const cpuInfo = ref<any>({})
 const memsInfo = ref<any>([])
 const disksInfo = ref<any[]>([])
 const displayInfo = ref<any>([])
 
-function getProcInfo() {
-  procInfo.value = {}
-  window.electron.ipcRenderer.invoke('get.procInfo').then((data: any) => {
-    procInfo.value = data
-  })
-}
-
 function getSysInfo() {
   sysInfo.value = {}
   window.electron.ipcRenderer.invoke('get.sysInfo').then((data: any) => {
     sysInfo.value = data
+  })
+}
+
+function getBoardInfo() {
+  boardInfo.value = {}
+  window.electron.ipcRenderer.invoke('get.boardInfo').then((data: any) => {
+    boardInfo.value = data
   })
 }
 
@@ -230,8 +157,8 @@ function getDisplayInfo() {
   })
 }
 
-getProcInfo()
 getSysInfo()
+getBoardInfo()
 getOsInfo()
 getMemsInfo()
 getDisksInfo()
@@ -290,28 +217,17 @@ ul {
   transform: translate(-2px, -2px);
 }
 
-.refresh-btn {
-  position: absolute;
-  right: 25px;
-  padding: 5px;
-  border-radius: 5px;
-  display: none;
-}
-
-.info-item:hover .refresh-btn,
-.info-proc:hover .refresh-btn {
-  display: inline-block;
-}
-
-.refresh-btn:hover {
-  display: inline-block;
-  cursor: pointer;
-  background-color: #88888830;
-}
-
 .item-title {
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 10px;
+}
+
+.blur-info {
+  filter: blur(5px);
+}
+
+.blur-info:hover {
+  filter: blur(0);
 }
 </style>

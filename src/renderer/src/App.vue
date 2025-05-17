@@ -1,6 +1,7 @@
 <template>
   <div style="position: relative;">
     <a-menu
+      style="z-index: 100;"
       id="nav-bar"
       v-model:selectedKeys="current"
       mode="horizontal"
@@ -28,7 +29,7 @@
     {
       key: 'software-info',
       icon: () => h(AppstoreAddOutlined),
-      label: h(RouterLink, { to: '/software-info' }, () => '数据监控')
+      label: h(RouterLink, { to: '/monitor' }, () => '数据监控')
     }
   ]);
 </script>

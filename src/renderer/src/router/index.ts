@@ -1,18 +1,18 @@
 import {createRouter, createWebHistory} from 'vue-router'
 
-import HardwareInfo from '@renderer/views/SystemInfo.vue'
-import SoftwareInfo from '@renderer/views/SoftwareInfo.vue'
+import SystemInfo from '@renderer/views/SystemInfo.vue'
+import DataMonitor from '@renderer/views/DataMonitor.vue'
 
 const router = createRouter({
   history:createWebHistory(),
   routes:[
     {
       path: '/',
-      component: HardwareInfo
+      component: SystemInfo
     },
     {
-      path: '/software-info',
-      component: SoftwareInfo
+      path: '/monitor',
+      component: DataMonitor
     }
   ]
 })
