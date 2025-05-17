@@ -126,7 +126,7 @@ function decryptData(encryptedData: string): string {
     const encryptedContent = atob(wrapper.data)
     
     // 解析加密内容
-    const { data, timestamp } = JSON.parse(encryptedContent)
+    const { data } = JSON.parse(encryptedContent)
     
     // 使用SM4解密数据
     const decryptedData = sm4.decrypt(data, SM4_KEY)

@@ -30,7 +30,7 @@
           </a-table>
         </div>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="资源图表">
+      <a-tab-pane key="2" tab="进程图表">
         <ResourceCharts :process-data="procInfo.list" />
       </a-tab-pane>
       <a-tab-pane key="3" tab="进程分析">
