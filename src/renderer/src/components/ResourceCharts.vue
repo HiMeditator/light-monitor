@@ -16,6 +16,17 @@
           <a-select-option value="json">JSON</a-select-option>
           <a-select-option value="csv">CSV</a-select-option>
         </a-select>
+        <a-button type="primary" @click="importData">
+          <template #icon><upload-outlined /></template>
+          导入数据
+        </a-button>
+        <input
+          ref="fileInput"
+          type="file"
+          accept=".json,.csv"
+          style="display: none"
+          @change="handleFileChange"
+        />
       </a-space>
     </div>
 
@@ -34,9 +45,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, onUnmounted } from 'vue'
-import { DownloadOutlined } from '@ant-design/icons-vue'
+import { DownloadOutlined, UploadOutlined } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
 import { message } from 'ant-design-vue'
+import { sm4 } from 'sm-crypto'
 
 const exportFormat = ref('json')
 const processCount = ref(10)
@@ -74,6 +86,58 @@ const memStats = ref({
 const props = defineProps<{
   processData: any[]
 }>()
+
+const fileInput = ref<HTMLInputElement | null>(null)
+
+// 加密密钥（实际应用中应该从配置文件或环境变量中获取）
+const SM4_KEY = '0123456789abcdeffedcba9876543210'
+
+// 加密数据
+function encryptData(data: string): string {
+  try {
+    // console.log('开始SM4加密...')
+    // 使用SM4加密数据
+    const sm4Encrypted = sm4.encrypt(data, SM4_KEY)
+    // console.log('SM4加密完成，长度:', sm4Encrypted.length)
+    
+    // 返回加密后的数据
+    const result = JSON.stringify({
+      data: sm4Encrypted,
+      timestamp: Date.now()
+    })
+    // console.log('加密结果JSON序列化完成，长度:', result.length)
+    return result
+  } catch (error: any) {
+    // console.error('加密过程失败:', error)
+    throw new Error(`加密失败: ${error.message || '未知错误'}`)
+  }
+}
+
+// 解密数据
+function decryptData(encryptedData: string): string {
+  try {
+    // 解析加密包装对象
+    const wrapper = JSON.parse(encryptedData)
+    if (!wrapper.encrypted || !wrapper.data) {
+      throw new Error('无效的加密数据格式')
+    }
+    
+    // 解码 Base64 数据
+    const encryptedContent = atob(wrapper.data)
+    
+    // 解析加密内容
+    const { data, timestamp } = JSON.parse(encryptedContent)
+    
+    // 使用SM4解密数据
+    const decryptedData = sm4.decrypt(data, SM4_KEY)
+    // console.log('SM4解密数据完成')
+    
+    return decryptedData
+  } catch (error: any) {
+    console.error('解密失败:', error)
+    throw new Error(`解密失败: ${error.message || '未知错误'}`)
+  }
+}
 
 // 初始化图表
 onMounted(() => {
@@ -397,34 +461,126 @@ watch(() => historyData.value, () => {
 
 // 导出数据
 function exportData() {
-  const data = props.processData
-  let content = ''
-  let filename = ''
-  
-  if (exportFormat.value === 'json') {
-    content = JSON.stringify(data, null, 2)
-    filename = 'process_data.json'
-  } else {
-    const headers = ['pid', 'name', 'cpu', 'mem', 'parentPid']
-    const csvContent = [
-      headers.join(','),
-      ...data.map(item => headers.map(header => item[header]).join(','))
-    ].join('\n')
-    content = csvContent
-    filename = 'process_data.csv'
+  try {
+    // console.log('开始导出数据...')
+    const data = props.processData
+    if (!data || !Array.isArray(data)) {
+      throw new Error('无效的数据格式')
+    }
+
+    let content = ''
+    let filename = ''
+    
+    if (exportFormat.value === 'json') {
+      content = JSON.stringify(data, null, 2)
+      filename = 'process_data.encrypted.json'
+    } else {
+      const headers = ['pid', 'name', 'cpu', 'mem', 'parentPid']
+      const csvContent = [
+        headers.join(','),
+        ...data.map(item => headers.map(header => item[header]).join(','))
+      ].join('\n')
+      content = csvContent
+      filename = 'process_data.encrypted.csv'
+    }
+    
+    // console.log('数据格式化完成，开始加密...')
+    // console.log('原始数据:', content)
+    
+    // 加密数据
+    const encryptedContent = encryptData(content)
+    // console.log('加密后数据:', encryptedContent)
+    
+    // 将加密后的内容转换为 Base64 格式
+    const base64Content = btoa(encryptedContent)
+    // console.log('Base64编码后:', base64Content)
+    
+    // 创建加密数据的包装对象
+    const encryptedWrapper = {
+      encrypted: true,
+      version: '1.0',
+      data: base64Content,
+      timestamp: Date.now()
+    }
+    
+    // 将包装对象转换为字符串
+    const finalContent = JSON.stringify(encryptedWrapper)
+    
+    const blob = new Blob([finalContent], { type: 'application/json' })
+    // console.log('Blob创建完成，大小:', blob.size)
+    
+    const url = URL.createObjectURL(blob)
+    // console.log('URL创建完成:', url)
+    
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    message.success('数据已加密导出成功')
+  } catch (error: any) {
+    console.error('导出失败，详细错误:', error)
+    message.error(`数据导出失败: ${error.message || '未知错误'}`)
   }
-  
-  const blob = new Blob([content], { type: exportFormat.value === 'json' ? 'application/json' : 'text/csv' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-  
-  message.success('数据导出成功')
+}
+
+// 导入数据
+function importData() {
+  fileInput.value?.click()
+}
+
+// 处理文件选择
+async function handleFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files || input.files.length === 0) {
+    return
+  }
+
+  const file = input.files[0]
+  try {
+    const content = await file.text()
+    // console.log('读取到的文件内容:', content)
+
+    // 尝试解析为JSON
+    const parsed = JSON.parse(content)
+    
+    // 检查是否是加密文件
+    if (parsed.encrypted && parsed.data) {
+      try {
+        // 解密数据
+        const decryptedData = decryptData(content)
+        // console.log('解密后的数据:', decryptedData)
+        
+        // 显示解密后的数据
+        message.success('数据解密成功')
+        
+        // 创建一个新文件下载解密后的数据
+        const blob = new Blob([decryptedData], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `decrypted_${file.name}`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      } catch (error: any) {
+        console.error('解密失败:', error)
+        message.error(`解密失败: ${error.message || '未知错误'}`)
+      }
+    } else {
+      message.warning('这不是一个加密文件')
+    }
+  } catch (error: any) {
+    console.error('文件读取失败:', error)
+    message.error(`文件读取失败: ${error.message || '未知错误'}`)
+  }
+
+  // 清空文件输入，允许重复选择同一文件
+  input.value = ''
 }
 
 // 组件卸载时清理
