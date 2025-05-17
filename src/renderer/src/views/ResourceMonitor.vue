@@ -192,7 +192,6 @@ async function getSystemResources() {
     metrics.value[3].value = data.network.reduce((acc, net) => acc + net.rx_sec, 0) / 1024 // 转换为KB/s
     metrics.value[4].value = data.network.reduce((acc, net) => acc + net.tx_sec, 0) / 1024 // 转换为KB/s
 
-    console.log( JSON.stringify(metrics.value))
     // 更新历史数据
     const now = new Date()
     historyData.value.push({
