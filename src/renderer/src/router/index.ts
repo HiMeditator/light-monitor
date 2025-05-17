@@ -1,18 +1,25 @@
-import {createRouter, createWebHistory} from 'vue-router'
-
-import SystemInfo from '@renderer/views/SystemInfo.vue'
-import DataMonitor from '@renderer/views/DataMonitor.vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import SystemInfo from '../views/SystemInfo.vue'
+import DataMonitor from '../views/DataMonitor.vue'
+import ResourceMonitor from '../views/ResourceMonitor.vue'
 
 const router = createRouter({
-  history:createWebHistory(),
-  routes:[
+  history: createWebHashHistory(),
+  routes: [
     {
       path: '/',
+      name: 'hardware-info',
       component: SystemInfo
     },
     {
-      path: '/monitor',
+      path: '/process',
+      name: 'software-info',
       component: DataMonitor
+    },
+    {
+      path: '/resource',
+      name: 'resource-monitor',
+      component: ResourceMonitor
     }
   ]
 })

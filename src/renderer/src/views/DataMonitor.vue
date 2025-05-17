@@ -1,20 +1,5 @@
 <template>
   <div class="monitor">
-    <h2>传感器数据</h2>
-    <a-row style="margin-bottom: 20px;">
-      <a-col :span="5">
-        <a-statistic title="电池电压" :value="batteryInfo.voltage" />
-      </a-col>
-      <a-col :span="5">
-        <a-statistic title="CPU平均核心温度" :value="cpuTempInfo.main || '读取失败'" />
-      </a-col>
-      <a-col :span="5">
-        <a-statistic title="CPU最大核心温度" :value="cpuTempInfo.max || '读取失败'" />
-      </a-col>
-      <a-col :span="5">
-        <a-statistic title="风扇转速" :value="'读取失败'" />
-      </a-col>
-    </a-row>
     <h2>进程统计</h2>
     <a-row style="margin-bottom: 20px;">
       <a-col :span="5">
@@ -45,14 +30,21 @@
           </a-table>
         </div>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="资源图表"></a-tab-pane>
-      <a-tab-pane key="3" tab="Tab 3"></a-tab-pane>
+      <a-tab-pane key="2" tab="资源图表">
+        <ResourceCharts :process-data="procInfo.list" />
+      </a-tab-pane>
+      <a-tab-pane key="3" tab="进程分析">
+        <ProcessAnalysis :process-data="procInfo.list" />
+      </a-tab-pane>
     </a-tabs>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import ResourceCharts from '../components/ResourceCharts.vue'
+import ProcessAnalysis from '../components/ProcessAnalysis.vue'
+
 const activeKey = ref('1');
 const procCol = [
   {
@@ -108,33 +100,17 @@ const procCol = [
   }
 ]
 const procInfo = ref<any>({})
-const batteryInfo = ref<any>({})
-const cpuTempInfo = ref<any>({})
 
 function getProcInfo() {
   window.electron.ipcRenderer.invoke('get.procInfo').then((data: any) => {
     procInfo.value = data
   })
 }
-function getBatteryInfo() {
-  window.electron.ipcRenderer.invoke('get.batteryInfo').then((data: any) => {
-    batteryInfo.value = data
-  })
-}
-function getCpuTempInfo() {
-  window.electron.ipcRenderer.invoke('get.cpuTempInfo').then((data: any) => {
-    cpuTempInfo.value = data
-  })
-}
 
 getProcInfo()
-getBatteryInfo()
-getCpuTempInfo()
 
 setInterval(() => {
   getProcInfo()
-  getBatteryInfo()
-  getCpuTempInfo()
 }, 2000)
 </script>
 

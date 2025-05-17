@@ -3,7 +3,8 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
-import {handelGetHardwareInfo} from './hardwareInfo'
+import { handelGetHardwareInfo } from './hardwareInfo'
+import { handleResourceMonitor } from './resourceMonitor'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -44,6 +45,7 @@ app.whenReady().then(() => {
   })
 
   handelGetHardwareInfo()
+  handleResourceMonitor()
   
   createWindow()
 
